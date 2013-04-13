@@ -1,0 +1,46 @@
+#!/bin/bash
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+. /etc/conf.d/mopidy
+
+PID=`ps -A -F | grep -v grep | grep "/usr/bin/python2 /usr/bin/mopidy" | awk '{print $2}'`
+OPTIONS="" # ex: --save-debug-log
+XSCREEN=":0.0"
+
+case "$1" in
+  start)
+    stat_busy "Starting Mopidy"
+    if [ -z "$MOPIDY_USER" ]; then
+      stat_busy "No MOPIDY_USER, please edit /etc/conf.d/mopidy"
+      stat_fail
+    else
+      # Dedicated session
+      [ -z "$PID" ] && su -l "$MOPIDY_USER" -s /bin/sh -c "source /home/${MOPIDY_USER}/.dbus/session-bus/*-0; export DISPLAY="$XSCREEN"; /usr/bin/mopidy ${OPTIONS} &> /dev/null &"
+      if [ $? -gt 0 ]; then
+        stat_fail
+      else
+        add_daemon mopidy
+        stat_done
+      fi
+    fi
+    ;;
+  stop)
+    stat_busy "Stopping Mopidy"
+    [ ! -z "$PID" ] && kill $PID &> /dev/null
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+      rm_daemon mopidy
+      stat_done
+    fi
+    ;;
+  restart)
+    $0 stop
+    while [ ! -z "$PID" -a -d "/proc/$PID" ]; do sleep 1; done
+    $0 start
+    ;;
+  *)
+    echo "usage: $0 {start|stop|restart}"
+esac
+exit 0
