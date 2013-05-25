@@ -4,4 +4,4 @@ Modified init script for Mopidy
 # Mail: florentdotme@gmail.com
 # GIT Repository: http://github.com/FlorentDotMe/
 ------------------------
-Info:   the script is based on packaged AUR init script for mopidy. This version allows the service to be managed from anyone and can reattach himself to the current dbus session.
+Info:   the script is based on packaged AUR init script for mopidy. This version allows the service to be managed by anyone and can reattach himself to the current dbus session.
